@@ -124,11 +124,12 @@
     box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
 }
 
-/* Input Icons - FIXED SIZE */
+/* Input Icons - PROPERLY CENTERED */
 .input-icon {
     position: absolute;
     left: 0.875rem;
-    top: 2.5rem;
+    top: calc(50% + 0.875rem);
+    transform: translateY(-50%);
     width: 18px;
     height: 18px;
     opacity: 0.5;
@@ -137,11 +138,12 @@
     stroke-width: 2;
 }
 
-/* Password Toggle Button */
+/* Password Toggle Button - PROPERLY CENTERED */
 .password-toggle {
     position: absolute;
     right: 0.75rem;
-    top: 2.35rem;
+    top: calc(50% + 0.875rem);
+    transform: translateY(-50%);
     width: 32px;
     height: 32px;
     border-radius: 6px;
