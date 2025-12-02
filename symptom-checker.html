@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="HealthScope BD - Symptom Checker - Check your symptoms and get health recommendations">
+    <meta name="keywords" content="health, symptom checker, Bangladesh, healthcare">
+    <title>Symptom Checker - HealthScope BD</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-wrapper">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <path
+                            d="M20 5C11.716 5 5 11.716 5 20C5 28.284 11.716 35 20 35C28.284 35 35 28.284 35 20C35 11.716 28.284 5 20 5Z"
+                            fill="url(#gradient1)" />
+                        <path
+                            d="M20 12C15.582 12 12 15.582 12 20C12 24.418 15.582 28 20 28C24.418 28 28 24.418 28 20C28 15.582 24.418 12 20 12Z"
+                            fill="white" />
+                        <circle cx="20" cy="20" r="4" fill="url(#gradient1)" />
+                        <defs>
+                            <linearGradient id="gradient1" x1="5" y1="5" x2="35" y2="35">
+                                <stop offset="0%" stop-color="#10b981" />
+                                <stop offset="100%" stop-color="#059669" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">HealthScope <span class="bd">BD</span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="symptom-checker.html" class="nav-link active">Symptom Checker</a></li>
+                <li><a href="index.html#trends" class="nav-link">Disease Trends</a></li>
+                <li><a href="report.html" class="nav-link">Report</a></li>
+                <li><a href="index.html#footer" class="nav-link">About Us</a></li>
+            </ul>
+
+            <div class="menu-toggle" id="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Symptom Checker Section -->
+    <section id="symptom-checker" class="section" style="padding-top: 120px;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Symptom Checker</h2>
+                <p class="section-description">Select your symptoms to get possible health conditions and
+                    recommendations</p>
+            </div>
+
+            <div class="checker-layout">
+                <div class="symptom-input-panel">
+                    <div class="panel-card">
+                        <h3 class="panel-title">Select Your Symptoms</h3>
+
+                        <div class="search-box">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <circle cx="9" cy="9" r="6" stroke="#6b7280" stroke-width="2" />
+                                <path d="M14 14L18 18" stroke="#6b7280" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                            <input type="text" id="symptom-search" placeholder="Search symptoms..." />
+                        </div>
+
+                        <div class="selected-symptoms" id="selected-symptoms">
+                            <!-- Selected symptoms will appear here -->
+                        </div>
+
+                        <div class="symptom-categories">
+                            <div class="category">
+                                <h4 class="category-title">Common Symptoms</h4>
+                                <div class="symptom-chips">
+                                    <div class="symptom-chip" data-symptom="fever" data-severity="3">
+                                        <span>Fever</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="cough" data-severity="2">
+                                        <span>Cough</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="headache" data-severity="2">
+                                        <span>Headache</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="fatigue" data-severity="2">
+                                        <span>Fatigue</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="body_ache" data-severity="2">
+                                        <span>Body Ache</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="sore_throat" data-severity="2">
+                                        <span>Sore Throat</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="category">
+                                <h4 class="category-title">Respiratory</h4>
+                                <div class="symptom-chips">
+                                    <div class="symptom-chip" data-symptom="shortness_of_breath" data-severity="4">
+                                        <span>Shortness of Breath</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="chest_pain" data-severity="5">
+                                        <span>Chest Pain</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="wheezing" data-severity="3">
+                                        <span>Wheezing</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="runny_nose" data-severity="1">
+                                        <span>Runny Nose</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="category">
+                                <h4 class="category-title">Digestive</h4>
+                                <div class="symptom-chips">
+                                    <div class="symptom-chip" data-symptom="nausea" data-severity="2">
+                                        <span>Nausea</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="vomiting" data-severity="3">
+                                        <span>Vomiting</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="diarrhea" data-severity="3">
+                                        <span>Diarrhea</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="abdominal_pain" data-severity="3">
+                                        <span>Abdominal Pain</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="loss_of_appetite" data-severity="2">
+                                        <span>Loss of Appetite</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="category">
+                                <h4 class="category-title">Other Symptoms</h4>
+                                <div class="symptom-chips">
+                                    <div class="symptom-chip" data-symptom="rash" data-severity="2">
+                                        <span>Rash</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="joint_pain" data-severity="3">
+                                        <span>Joint Pain</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="chills" data-severity="3">
+                                        <span>Chills</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="dizziness" data-severity="3">
+                                        <span>Dizziness</span>
+                                    </div>
+                                    <div class="symptom-chip" data-symptom="sweating" data-severity="2">
+                                        <span>Sweating</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary btn-block" id="analyze-btn" disabled>
+                            <span>Analyze Symptoms</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="results-panel" id="results-panel">
+                    <div class="panel-card">
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <h3>No Analysis Yet</h3>
+                            <p>Select symptoms from the left panel and click "Analyze Symptoms" to get results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <div class="logo-icon">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                <path
+                                    d="M20 5C11.716 5 5 11.716 5 20C5 28.284 11.716 35 20 35C28.284 35 35 28.284 35 20C35 11.716 28.284 5 20 5Z"
+                                    fill="url(#gradient2)" />
+                                <path
+                                    d="M20 12C15.582 12 12 15.582 12 20C12 24.418 15.582 28 20 28C24.418 28 28 24.418 28 20C28 15.582 24.418 12 20 12Z"
+                                    fill="white" />
+                                <circle cx="20" cy="20" r="4" fill="url(#gradient2)" />
+                                <defs>
+                                    <linearGradient id="gradient2" x1="5" y1="5" x2="35" y2="35">
+                                        <stop offset="0%" stop-color="#10b981" />
+                                        <stop offset="100%" stop-color="#059669" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">HealthScope <span class="bd">BD</span></span>
+                    </div>
+                    <p class="footer-description">
+                        Empowering Bangladesh with digital health solutions for a healthier tomorrow.
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="symptom-checker.html">Symptom Checker</a></li>
+                        <li><a href="index.html#trends">Disease Trends</a></li>
+                        <li><a href="report.html">Report Disease</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Health Guidelines</a></li>
+                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:contactwithfuad@gmail.com">📧 contactwithfuad@gmail.com</a></li>
+                        <li><a href="tel:+8801943033803">📱 +880 1943-033803</a></li>
+                        <li>📍 Dhaka, Bangladesh</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 HealthScope BD. All rights reserved.</p>
+                <p class="disclaimer">⚠️ This platform provides general health information and should not replace
+                    professional medical advice.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Custom JavaScript -->
+    <script src="app.js"></script>
+</body>
+
+</html>
