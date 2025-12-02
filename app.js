@@ -989,3 +989,69 @@ function showToast(message, type = 'info') {
 window.scrollToSection = scrollToSection;
 window.removeSymptom = removeSymptom;
 window.applyRedHeatmap = applyRedHeatmap; // export this so you can toggle red mode from console/button
+
+// ===================
+// AUTHENTICATION HANDLING
+// ===================
+function initializeAuthForms() {
+    // Login Form
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simulate login (in real app, this would call an API)
+            showToast('Login successful! Welcome back.', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        });
+    }
+    
+    // Signup Form
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
+            
+            // Simulate signup (in real app, this would call an API)
+            showToast('Account created successfully! Please login.', 'success');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        });
+    }
+    
+    // Social Login Buttons
+    const socialBtns = document.querySelectorAll('.social-btn');
+    socialBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const provider = btn.classList.contains('google-btn') ? 'Google' : 'Facebook';
+            showToast(\\ login coming soon!\, 'info');
+        });
+    });
+}
+
+// Update initialization
+document.addEventListener('DOMContentLoaded', function () {
+    initializeNavigation();
+    initializeSymptomChecker();
+    initializeDiseaseMap();
+    initializeReportForm();
+    initializeHealthTips();
+    initializeAuthForms();  // Add this line
+});
