@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Chip Test</title>
+    <style>
+        .symptom-chip {
+            display: inline-block;
+            padding: 0.625rem 1.25rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #111827;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            margin: 5px;
+        }
+
+        .symptom-chip:hover {
+            border-color: #10b981;
+            background: #10b981;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .symptom-chip.selected {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-color: #10b981;
+        }
+
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Symptom Chip Click Test</h2>
+    <div class="symptom-chip" data-symptom="fever">Fever</div>
+    <div class="symptom-chip" data-symptom="cough">Cough</div>
+    <div class="symptom-chip" data-symptom="headache">Headache</div>
+
+    <div id="status">Click on symptoms above to test</div>
+
+    <script>
+        console.log('Script loaded');
+
+        const chips = document.querySelectorAll('.symptom-chip');
+        console.log('Found chips:', chips.length);
+
+        chips.forEach(chip => {
+            chip.addEventListener('click', function () {
+                const symptom = this.dataset.symptom;
+                console.log('Clicked:', symptom);
+
+                this.classList.toggle('selected');
+                document.getElementById('status').textContent = 'Clicked: ' + symptom + ' - ' + (this.classList.contains('selected') ? 'SELECTED' : 'DESELECTED');
+            });
+        });
+    </script>
+</body>
+
+</html>

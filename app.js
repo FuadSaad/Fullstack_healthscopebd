@@ -106,23 +106,33 @@ function scrollToSection(sectionId) {
 // SYMPTOM CHECKER
 // ===================
 function initializeSymptomChecker() {
+    console.log('initializeSymptomChecker called');
+
     const symptomChips = document.querySelectorAll('.symptom-chip');
     const analyzeBtn = document.getElementById('analyze-btn');
     const searchInput = document.getElementById('symptom-search');
 
+    console.log('Found symptom chips:', symptomChips.length);
+    console.log('Found analyze button:', !!analyzeBtn);
+    console.log('Found search input:', !!searchInput);
+
     // Symptom selection
     symptomChips.forEach(chip => {
+        console.log('Adding listener to chip:', chip.dataset.symptom);
         chip.addEventListener('click', () => {
             const symptom = chip.dataset.symptom;
+            console.log('Chip clicked:', symptom);
 
             if (appState.selectedSymptoms.has(symptom)) {
                 appState.selectedSymptoms.delete(symptom);
                 chip.classList.remove('selected');
                 removeSelectedChip(symptom);
+                console.log('Deselected:', symptom);
             } else {
                 appState.selectedSymptoms.add(symptom);
                 chip.classList.add('selected');
                 addSelectedChip(symptom, chip.textContent.trim());
+                console.log('Selected:', symptom);
             }
 
             updateAnalyzeButton();
@@ -522,6 +532,12 @@ function displayResults(matches) {
 // DISEASE MAP (updated & fixed)
 // ===================
 function initializeDiseaseMap() {
+    const mapElement = document.getElementById('disease-map');
+    if (!mapElement || typeof L === 'undefined') {
+        console.log('Disease map not initialized - element or Leaflet library not found');
+        return;
+    }
+
     const map = L.map('disease-map').setView([23.8103, 90.4125], 7);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1001,7 +1017,7 @@ function initializeAuthForms() {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            
+
             // Simulate login (in real app, this would call an API)
             showToast('Login successful! Welcome back.', 'success');
             setTimeout(() => {
@@ -1009,7 +1025,7 @@ function initializeAuthForms() {
             }, 1500);
         });
     }
-    
+
     // Signup Form
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
@@ -1020,13 +1036,13 @@ function initializeAuthForms() {
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-            
+
             // Validate passwords match
             if (password !== confirmPassword) {
                 showToast('Passwords do not match!', 'error');
                 return;
             }
-            
+
             // Simulate signup (in real app, this would call an API)
             showToast('Account created successfully! Please login.', 'success');
             setTimeout(() => {
@@ -1034,14 +1050,14 @@ function initializeAuthForms() {
             }, 1500);
         });
     }
-    
+
     // Social Login Buttons
     const socialBtns = document.querySelectorAll('.social-btn');
     socialBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             const provider = btn.classList.contains('google-btn') ? 'Google' : 'Facebook';
-            showToast(\\ login coming soon!\, 'info');
+            showToast(`${provider} login coming soon!`, 'info');
         });
     });
 }
