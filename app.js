@@ -68,32 +68,38 @@ function initializeNavigation() {
         });
     });
 
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            let current = '';
-            const sections = document.querySelectorAll('.section, .hero');
+    // Only enable scroll-based active detection on homepage (index.html)
+    // Check if we're on the homepage by looking for the hero section
+    const isHomePage = document.querySelector('.hero') !== null && window.location.pathname.includes('index');
 
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.offsetHeight;
-                if (scrollY >= (sectionTop - 200) && scrollY < (sectionTop + sectionHeight - 200)) {
-                    current = section.getAttribute('id');
-                }
-            });
+    if (isHomePage) {
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                let current = '';
+                const sections = document.querySelectorAll('.section, .hero');
 
-            if (!current || scrollY < 100) current = 'home';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    if (scrollY >= (sectionTop - 200) && scrollY < (sectionTop + sectionHeight - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
 
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                const linkHref = link.getAttribute('href');
-                if (linkHref === `#${current}` || (linkHref === '#home' && current === 'home')) {
-                    link.classList.add('active');
-                }
-            });
-        }, 100);
-    });
+                if (!current || scrollY < 100) current = 'home';
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    const linkHref = link.getAttribute('href');
+                    if (linkHref === `#${current}` || (linkHref === '#home' && current === 'home')) {
+                        link.classList.add('active');
+                    }
+                });
+            }, 100);
+        });
+    }
 }
 
 function scrollToSection(sectionId) {
