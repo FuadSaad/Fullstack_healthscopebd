@@ -2744,6 +2744,7 @@ textarea.form-input {
     background: var(--color-border-light);
     opacity: .9;
 }
+
 /* Navigation Auth Link - Updated for Light Navbar */
 .nav-auth {
     display: flex;
@@ -2771,7 +2772,7 @@ textarea.form-input {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     transition: left 0.5s;
 }
 
@@ -2782,4 +2783,130 @@ textarea.form-input {
 .nav-auth-link:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* ========================================
+   NAVBAR PROFILE DROPDOWN (Logged In State)
+   ======================================== */
+
+.nav-profile-dropdown {
+    position: relative;
+}
+
+.nav-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.nav-profile-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.nav-avatar {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.nav-user-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 180px;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all var(--transition-base);
+    z-index: 1001;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.nav-dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.nav-dropdown-item:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-primary);
+}
+
+.nav-dropdown-item svg {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+}
+
+.nav-dropdown-item:hover svg {
+    color: var(--color-primary);
+}
+
+.nav-logout-btn {
+    border-top: 1px solid var(--color-border);
+    color: var(--color-danger);
+}
+
+.nav-logout-btn:hover {
+    background: #fef2f2;
+    color: var(--color-danger);
+}
+
+.nav-logout-btn svg {
+    color: var(--color-danger);
+}
+
+/* Hide dropdown on mobile - show in mobile menu instead */
+@media (max-width: 768px) {
+    .nav-profile-dropdown {
+        display: none;
+    }
+
+    .nav-auth.logged-in .nav-profile-dropdown {
+        display: block;
+    }
 }

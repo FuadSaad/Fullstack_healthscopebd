@@ -4,22 +4,32 @@
  */
 
 require_once '../config/database.php';
+require_once '../includes/auth.php';
+
+// Start session
+startSession();
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
 
+$name = $input['name'] ?? '';
 $firstName = $input['firstName'] ?? '';
 $lastName = $input['lastName'] ?? '';
 $email = $input['email'] ?? '';
 $phone = $input['phone'] ?? '';
 $password = $input['password'] ?? '';
 
+// Support both name formats
+if (empty($name) && (!empty($firstName) || !empty($lastName))) {
+    $name = trim($firstName . ' ' . $lastName);
+}
+
 // Validate input
-if (empty($firstName) || empty($lastName) || empty($email) || empty($password)) {
+if (empty($name) || empty($email) || empty($password)) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => 'All required fields must be filled'
+        'message' => 'Name, email, and password are required'
     ]);
     exit();
 }
@@ -57,7 +67,7 @@ if ($result->num_rows > 0) {
     http_response_code(409);
     echo json_encode([
         'success' => false,
-        'message' => 'Email already registered'
+        'message' => 'An account with this email already exists'
     ]);
     $stmt->close();
     closeDBConnection($conn);
@@ -65,31 +75,34 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 
-// Hash password
-$passwordHash = password_hash($password, PASSWORD_DEFAULT);
-$fullName = $firstName . ' ' . $lastName;
+// Hash password using bcrypt
+$passwordHash = password_hash($password, PASSWORD_BCRYPT);
 
 // Insert new user
 $stmt = $conn->prepare("INSERT INTO users (name, email, phone, password_hash, created_at) VALUES (?, ?, ?, ?, NOW())");
-$stmt->bind_param("ssss", $fullName, $email, $phone, $passwordHash);
+$stmt->bind_param("ssss", $name, $email, $phone, $passwordHash);
 
 if ($stmt->execute()) {
     $userId = $stmt->insert_id;
+
+    // Auto-login: Set user session
+    setUserSession($userId, $email, $name);
 
     echo json_encode([
         'success' => true,
         'message' => 'Account created successfully',
         'user' => [
             'id' => $userId,
-            'name' => $fullName,
-            'email' => $email
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone
         ]
     ]);
 } else {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Failed to create account',
+        'message' => 'Failed to create account. Please try again.',
         'error' => $stmt->error
     ]);
 }

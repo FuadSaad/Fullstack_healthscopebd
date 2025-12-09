@@ -544,6 +544,16 @@ function displayResults(matches) {
 
     resultsPanel.innerHTML = html;
     resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Save symptom check to database if user is logged in
+    const symptoms = Array.from(appState.selectedSymptoms);
+    if (typeof saveSymptomCheck === 'function' && symptoms.length > 0) {
+        saveSymptomCheck(symptoms, topMatch).then(reportId => {
+            if (reportId) {
+                showToast('✓ Report saved to your profile!', 'success');
+            }
+        });
+    }
 }
 
 // ===================
@@ -1027,46 +1037,27 @@ window.applyRedHeatmap = applyRedHeatmap; // export this so you can toggle red m
 // ===================
 // AUTHENTICATION HANDLING
 // ===================
+
+// Authentication state
+const authState = {
+    user: null,
+    isLoggedIn: false
+};
+
 function initializeAuthForms() {
+    // Check session on page load
+    checkAuthSession();
+
     // Login Form
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            // Simulate login (in real app, this would call an API)
-            showToast('Login successful! Welcome back.', 'success');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
-        });
+        loginForm.addEventListener('submit', handleLogin);
     }
 
     // Signup Form
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
-        signupForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const firstName = document.getElementById('first-name').value;
-            const lastName = document.getElementById('last-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            // Validate passwords match
-            if (password !== confirmPassword) {
-                showToast('Passwords do not match!', 'error');
-                return;
-            }
-
-            // Simulate signup (in real app, this would call an API)
-            showToast('Account created successfully! Please login.', 'success');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1500);
-        });
+        signupForm.addEventListener('submit', handleSignup);
     }
 
     // Social Login Buttons
@@ -1079,3 +1070,390 @@ function initializeAuthForms() {
         });
     });
 }
+
+// Check if user is logged in via PHP session
+async function checkAuthSession() {
+    try {
+        const response = await fetch('api/check-session.php', {
+            credentials: 'include'
+        });
+
+        // Check if we got HTML/PHP source instead of JSON (PHP not running)
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            // PHP is not being executed - silently fall back to localStorage
+            console.log('Note: PHP not available. For full auth features, run via XAMPP.');
+            fallbackToLocalStorage();
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.logged_in) {
+            authState.user = data.user;
+            authState.isLoggedIn = true;
+            localStorage.setItem('healthscope_user', JSON.stringify(data.user));
+            updateNavbar(true, data.user);
+        } else {
+            authState.user = null;
+            authState.isLoggedIn = false;
+            localStorage.removeItem('healthscope_user');
+            updateNavbar(false);
+        }
+    } catch (error) {
+        // Silently fall back to localStorage when PHP not available
+        fallbackToLocalStorage();
+    }
+}
+
+// Fallback to localStorage when PHP is not available
+function fallbackToLocalStorage() {
+    const stored = localStorage.getItem('healthscope_user');
+    if (stored) {
+        try {
+            authState.user = JSON.parse(stored);
+            authState.isLoggedIn = true;
+            updateNavbar(true, authState.user);
+        } catch (e) {
+            localStorage.removeItem('healthscope_user');
+            updateNavbar(false);
+        }
+    } else {
+        updateNavbar(false);
+    }
+}
+
+// Update navbar based on authentication state
+function updateNavbar(isLoggedIn, user = null) {
+    const navAuth = document.getElementById('nav-auth') || document.querySelector('.nav-auth');
+    if (!navAuth) return;
+
+    if (isLoggedIn && user) {
+        const firstName = user.name ? user.name.split(' ')[0] : 'User';
+        const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+
+        navAuth.innerHTML = `
+            <div class="nav-profile-dropdown">
+                <button class="nav-profile-btn" onclick="toggleProfileDropdown()">
+                    <span class="nav-avatar">${initial}</span>
+                    <span class="nav-user-name">${firstName}</span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu" id="profile-dropdown">
+                    <a href="profile.html" class="nav-dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        My Profile
+                    </a>
+                    <button class="nav-dropdown-item nav-logout-btn" onclick="handleLogout()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        `;
+        navAuth.classList.add('logged-in');
+    } else {
+        navAuth.innerHTML = `<a href="login.html" class="nav-auth-link">Login/Sign Up</a>`;
+        navAuth.classList.remove('logged-in');
+    }
+}
+
+// Toggle profile dropdown
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('profile-dropdown');
+    const profileBtn = document.querySelector('.nav-profile-btn');
+    if (dropdown && profileBtn && !profileBtn.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Handle login form submission
+async function handleLogin(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email')?.value;
+    const password = document.getElementById('password')?.value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    if (!email || !password) {
+        showToast('Please enter email and password', 'error');
+        return;
+    }
+
+    // Disable button during request
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Logging in...</span>';
+    }
+
+    try {
+        const response = await fetch('api/login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password })
+        });
+
+        // Check if PHP is not running (returns HTML/PHP source)
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            // Demo mode: Check localStorage when PHP not available
+            demoLogin(email, password, submitBtn);
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            authState.user = data.user;
+            authState.isLoggedIn = true;
+            localStorage.setItem('healthscope_user', JSON.stringify(data.user));
+
+            showToast('Login successful! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            showToast(data.message || 'Login failed. Please try again.', 'error');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Login</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+            }
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        // Demo mode fallback
+        demoLogin(email, password, submitBtn);
+    }
+}
+
+// Demo mode login (works without PHP/XAMPP)
+function demoLogin(email, password, submitBtn) {
+    const existingUsers = JSON.parse(localStorage.getItem('healthscope_demo_users') || '[]');
+    const user = existingUsers.find(u => u.email === email && u.password === password);
+
+    if (user) {
+        const userData = { id: user.id, name: user.name, email: user.email, joined: user.joined };
+        authState.user = userData;
+        authState.isLoggedIn = true;
+        localStorage.setItem('healthscope_user', JSON.stringify(userData));
+
+        showToast('✅ Login successful! (Demo Mode)', 'success');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    } else {
+        showToast('Invalid email or password', 'error');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Login</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+        }
+    }
+}
+
+// Handle signup form submission
+async function handleSignup(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('full-name')?.value;
+    const email = document.getElementById('email')?.value;
+    const password = document.getElementById('password')?.value;
+    const confirmPassword = document.getElementById('confirm-password')?.value;
+    const terms = document.getElementById('terms')?.checked;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    // Validation
+    if (!name || !email || !password) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showToast('Passwords do not match!', 'error');
+        return;
+    }
+
+    if (password.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        return;
+    }
+
+    if (!terms) {
+        showToast('Please accept the Terms of Service', 'error');
+        return;
+    }
+
+    // Disable button during request
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Creating Account...</span>';
+    }
+
+    try {
+        const response = await fetch('api/signup.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name, email, password })
+        });
+
+        // Check if PHP is not running (returns HTML/PHP source)
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            // Demo mode: Save to localStorage when PHP not available
+            demoSignup(name, email, password, submitBtn);
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            authState.user = data.user;
+            authState.isLoggedIn = true;
+            localStorage.setItem('healthscope_user', JSON.stringify(data.user));
+
+            showToast('Account created successfully! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            showToast(data.message || 'Signup failed. Please try again.', 'error');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Create Account</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+            }
+        }
+    } catch (error) {
+        console.error('Signup error:', error);
+        // Demo mode fallback
+        demoSignup(name, email, password, submitBtn);
+    }
+}
+
+// Demo mode signup (works without PHP/XAMPP)
+function demoSignup(name, email, password, submitBtn) {
+    // Get existing demo users or create empty array
+    const existingUsers = JSON.parse(localStorage.getItem('healthscope_demo_users') || '[]');
+
+    // Check if email already exists
+    if (existingUsers.find(u => u.email === email)) {
+        showToast('Email already registered. Please login.', 'error');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Create Account</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+        }
+        return;
+    }
+
+    // Create new user
+    const newUser = {
+        id: Date.now(),
+        name: name,
+        email: email,
+        password: password, // In demo mode only - NOT secure for production
+        joined: new Date().toISOString()
+    };
+
+    // Save user to demo users list
+    existingUsers.push(newUser);
+    localStorage.setItem('healthscope_demo_users', JSON.stringify(existingUsers));
+
+    // Log in the user
+    const userData = { id: newUser.id, name: newUser.name, email: newUser.email, joined: newUser.joined };
+    authState.user = userData;
+    authState.isLoggedIn = true;
+    localStorage.setItem('healthscope_user', JSON.stringify(userData));
+
+    showToast('✅ Account created! (Demo Mode)', 'success');
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 1000);
+}
+
+// Handle logout
+async function handleLogout() {
+    try {
+        const response = await fetch('api/logout.php', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            authState.user = null;
+            authState.isLoggedIn = false;
+            localStorage.removeItem('healthscope_user');
+
+            showToast('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 500);
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Clear local state anyway
+        authState.user = null;
+        authState.isLoggedIn = false;
+        localStorage.removeItem('healthscope_user');
+        window.location.href = 'index.html';
+    }
+}
+
+// Save symptom check result to database
+async function saveSymptomCheck(symptoms, result) {
+    if (!authState.isLoggedIn) {
+        console.log('User not logged in, symptom check not saved');
+        return null;
+    }
+
+    try {
+        const response = await fetch('api/save-symptom-check.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                symptoms: symptoms,
+                predicted_disease: result.name || '',
+                severity: result.triage || 'mild',
+                recommendations: result.recommendations ? result.recommendations.join('; ') : ''
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('Symptom check saved with ID:', data.report_id);
+            return data.report_id;
+        } else {
+            console.error('Failed to save symptom check:', data.message);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error saving symptom check:', error);
+        return null;
+    }
+}
+
+// Expose auth functions globally
+window.checkAuthSession = checkAuthSession;
+window.updateNavbar = updateNavbar;
+window.handleLogout = handleLogout;
+window.toggleProfileDropdown = toggleProfileDropdown;
+window.saveSymptomCheck = saveSymptomCheck;
+

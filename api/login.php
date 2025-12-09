@@ -4,6 +4,10 @@
  */
 
 require_once '../config/database.php';
+require_once '../includes/auth.php';
+
+// Start session
+startSession();
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
@@ -25,7 +29,7 @@ if (empty($email) || empty($password)) {
 $conn = getDBConnection();
 
 // Prepare SQL statement
-$stmt = $conn->prepare("SELECT id, name, email, password_hash FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT id, name, email, phone, password_hash, created_at FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -45,18 +49,18 @@ $user = $result->fetch_assoc();
 
 // Verify password
 if (password_verify($password, $user['password_hash'])) {
-    // Login successful
-    session_start();
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['user_email'] = $user['email'];
-    
+    // Set user session
+    setUserSession($user['id'], $user['email'], $user['name']);
+
     echo json_encode([
         'success' => true,
         'message' => 'Login successful',
         'user' => [
             'id' => $user['id'],
             'name' => $user['name'],
-            'email' => $user['email']
+            'email' => $user['email'],
+            'phone' => $user['phone'],
+            'joined' => $user['created_at']
         ]
     ]);
 } else {

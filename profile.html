@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="My Profile - HealthScope BD">
+    <title>My Profile - HealthScope BD</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Profile Page Specific Styles */
+        .profile-container {
+            padding-top: 120px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #dbeafe 100%);
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .profile-details h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .profile-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .profile-meta-item svg {
+            width: 18px;
+            height: 18px;
+            color: #10b981;
+        }
+
+        .profile-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Reports Section */
+        .reports-section {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .reports-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .reports-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .reports-count {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .report-card {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .report-card:hover {
+            border-color: #10b981;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .report-disease {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #111827;
+        }
+
+        .report-date {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .report-severity {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-mild {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .severity-moderate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .severity-severe {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .report-symptoms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .symptom-tag {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .report-recommendations {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .empty-reports {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .empty-reports-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-reports h3 {
+            font-size: 1.25rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-meta {
+                justify-content: center;
+            }
+
+            .profile-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-wrapper">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <path
+                            d="M20 5C11.716 5 5 11.716 5 20C5 28.284 11.716 35 20 35C28.284 35 35 28.284 35 20C35 11.716 28.284 5 20 5Z"
+                            fill="url(#gradient1)" />
+                        <path
+                            d="M20 12C15.582 12 12 15.582 12 20C12 24.418 15.582 28 20 28C24.418 28 28 24.418 28 20C28 15.582 24.418 12 20 12Z"
+                            fill="white" />
+                        <circle cx="20" cy="20" r="4" fill="url(#gradient1)" />
+                        <defs>
+                            <linearGradient id="gradient1" x1="5" y1="5" x2="35" y2="35">
+                                <stop offset="0%" stop-color="#10b981" />
+                                <stop offset="100%" stop-color="#059669" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">HealthScope <span class="bd">BD</span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="symptom-checker.html" class="nav-link">Symptom Checker</a></li>
+                <li><a href="index.html#trends" class="nav-link">Disease Trends</a></li>
+                <li><a href="report.html" class="nav-link">Report</a></li>
+                <li><a href="team.html" class="nav-link">About Us</a></li>
+            </ul>
+
+            <div class="nav-auth" id="nav-auth">
+                <a href="login.html" class="nav-auth-link">Login/Sign Up</a>
+            </div>
+
+            <div class="menu-toggle" id="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Content -->
+    <section class="profile-container">
+        <div class="container">
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-state">
+                <div class="spinner"></div>
+                <p>Loading your profile...</p>
+            </div>
+
+            <!-- Profile Content (hidden initially) -->
+            <div id="profile-content" style="display: none;">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-info">
+                        <div class="profile-avatar" id="profile-avatar">U</div>
+                        <div class="profile-details">
+                            <h1 id="profile-name">User Name</h1>
+                            <div class="profile-meta">
+                                <div class="profile-meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path
+                                            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                        <polyline points="22,6 12,13 2,6" />
+                                    </svg>
+                                    <span id="profile-email">user@example.com</span>
+                                </div>
+                                <div class="profile-meta-item" id="profile-phone-container">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path
+                                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                    </svg>
+                                    <span id="profile-phone">Not provided</span>
+                                </div>
+                                <div class="profile-meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                    </svg>
+                                    <span>Joined <span id="profile-joined">-</span></span>
+                                </div>
+                            </div>
+                            <div class="profile-actions">
+                                <a href="symptom-checker.html" class="btn btn-primary">
+                                    <span>Check Symptoms</span>
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                    </svg>
+                                </a>
+                                <button class="btn btn-logout" onclick="handleLogout()">
+                                    <span>Logout</span>
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M7 17H4C3.448 17 3 16.552 3 16V4C3 3.448 3.448 3 4 3H7"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                        <path d="M14 14L18 10L14 6" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M18 10H7" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div class="reports-section">
+                    <div class="reports-header">
+                        <h2>Your Health Reports</h2>
+                        <span class="reports-count" id="reports-count">0 reports</span>
+                    </div>
+                    <div class="reports-list" id="reports-list">
+                        <!-- Reports will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Custom JavaScript -->
+    <script src="app.js"></script>
+    <script>
+        // Profile page specific functions
+        async function loadProfile() {
+            const loadingState = document.getElementById('loading-state');
+            const profileContent = document.getElementById('profile-content');
+
+            try {
+                const response = await fetch('api/profile.php');
+                const data = await response.json();
+
+                if (!data.success) {
+                    // Not logged in, redirect to login
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Populate profile data
+                const user = data.user;
+                document.getElementById('profile-name').textContent = user.name;
+                document.getElementById('profile-email').textContent = user.email;
+                document.getElementById('profile-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+                if (user.phone) {
+                    document.getElementById('profile-phone').textContent = user.phone;
+                } else {
+                    document.getElementById('profile-phone-container').style.display = 'none';
+                }
+
+                if (user.joined) {
+                    const joinDate = new Date(user.joined);
+                    document.getElementById('profile-joined').textContent = joinDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+
+                // Populate reports
+                const reportsList = document.getElementById('reports-list');
+                const reportsCount = document.getElementById('reports-count');
+
+                if (data.reports && data.reports.length > 0) {
+                    reportsCount.textContent = `${data.reports.length} report${data.reports.length > 1 ? 's' : ''}`;
+                    reportsList.innerHTML = data.reports.map(report => createReportCard(report)).join('');
+                } else {
+                    reportsCount.textContent = '0 reports';
+                    reportsList.innerHTML = `
+                        <div class="empty-reports">
+                            <div class="empty-reports-icon">📋</div>
+                            <h3>No Health Reports Yet</h3>
+                            <p>Use the Symptom Checker to analyze your symptoms and save reports here.</p>
+                            <a href="symptom-checker.html" class="btn btn-primary" style="margin-top: 1rem;">
+                                <span>Check Symptoms</span>
+                            </a>
+                        </div>
+                    `;
+                }
+
+                // Show profile content
+                loadingState.style.display = 'none';
+                profileContent.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        function createReportCard(report) {
+            const date = new Date(report.date);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const symptoms = Array.isArray(report.symptoms) ? report.symptoms : [];
+            const symptomsHtml = symptoms.map(s => `<span class="symptom-tag">${formatSymptom(s)}</span>`).join('');
+
+            return `
+                <div class="report-card">
+                    <div class="report-header">
+                        <div>
+                            <div class="report-disease">${report.predicted_disease || 'Health Analysis'}</div>
+                            <div class="report-date">${formattedDate}</div>
+                        </div>
+                        <span class="report-severity severity-${report.severity || 'mild'}">${report.severity || 'mild'}</span>
+                    </div>
+                    <div class="report-symptoms">${symptomsHtml}</div>
+                    ${report.recommendations ? `<div class="report-recommendations">${report.recommendations}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function formatSymptom(symptom) {
+            return symptom.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        async function handleLogout() {
+            try {
+                const response = await fetch('api/logout.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Clear local storage
+                    localStorage.removeItem('healthscope_user');
+                    // Redirect to home
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Still redirect even on error
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Load profile on page load
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+
+</html>
