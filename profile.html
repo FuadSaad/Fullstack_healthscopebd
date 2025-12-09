@@ -381,11 +381,22 @@
                 <!-- Reports Section -->
                 <div class="reports-section">
                     <div class="reports-header">
-                        <h2>Your Health Reports</h2>
+                        <h2>🏥 Your Symptom Check Reports</h2>
                         <span class="reports-count" id="reports-count">0 reports</span>
                     </div>
                     <div class="reports-list" id="reports-list">
-                        <!-- Reports will be loaded here -->
+                        <!-- Symptom Check Reports will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Disease Reports Section -->
+                <div class="reports-section" style="margin-top: 2rem;">
+                    <div class="reports-header">
+                        <h2>📋 Your Disease Reports</h2>
+                        <span class="reports-count" id="disease-reports-count">0 reports</span>
+                    </div>
+                    <div class="reports-list" id="disease-reports-list">
+                        <!-- Disease Reports will be loaded here -->
                     </div>
                 </div>
             </div>
@@ -434,7 +445,7 @@
                     });
                 }
 
-                // Populate reports
+                // Populate symptom check reports
                 const reportsList = document.getElementById('reports-list');
                 const reportsCount = document.getElementById('reports-count');
 
@@ -446,10 +457,31 @@
                     reportsList.innerHTML = `
                         <div class="empty-reports">
                             <div class="empty-reports-icon">📋</div>
-                            <h3>No Health Reports Yet</h3>
-                            <p>Use the Symptom Checker to analyze your symptoms and save reports here.</p>
+                            <h3>No Symptom Check Reports</h3>
+                            <p>Use the Symptom Checker to analyze your symptoms.</p>
                             <a href="symptom-checker.html" class="btn btn-primary" style="margin-top: 1rem;">
                                 <span>Check Symptoms</span>
+                            </a>
+                        </div>
+                    `;
+                }
+
+                // Populate disease reports
+                const diseaseReportsList = document.getElementById('disease-reports-list');
+                const diseaseReportsCount = document.getElementById('disease-reports-count');
+
+                if (data.disease_reports && data.disease_reports.length > 0) {
+                    diseaseReportsCount.textContent = `${data.disease_reports.length} report${data.disease_reports.length > 1 ? 's' : ''}`;
+                    diseaseReportsList.innerHTML = data.disease_reports.map(report => createDiseaseReportCard(report)).join('');
+                } else {
+                    diseaseReportsCount.textContent = '0 reports';
+                    diseaseReportsList.innerHTML = `
+                        <div class="empty-reports">
+                            <div class="empty-reports-icon">📝</div>
+                            <h3>No Disease Reports</h3>
+                            <p>Help your community by reporting disease cases.</p>
+                            <a href="report.html" class="btn btn-primary" style="margin-top: 1rem;">
+                                <span>Report Disease</span>
                             </a>
                         </div>
                     `;
@@ -461,8 +493,74 @@
 
             } catch (error) {
                 console.error('Error loading profile:', error);
-                window.location.href = 'login.html';
+                // Try demo mode for profile
+                loadDemoProfile();
             }
+        }
+
+        // Demo mode profile loading
+        function loadDemoProfile() {
+            const loadingState = document.getElementById('loading-state');
+            const profileContent = document.getElementById('profile-content');
+
+            const user = JSON.parse(localStorage.getItem('healthscope_user'));
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Populate user data
+            document.getElementById('profile-name').textContent = user.name || 'User';
+            document.getElementById('profile-email').textContent = user.email || '';
+            document.getElementById('profile-avatar').textContent = (user.name || 'U').charAt(0).toUpperCase();
+            document.getElementById('profile-phone-container').style.display = 'none';
+
+            if (user.joined) {
+                const joinDate = new Date(user.joined);
+                document.getElementById('profile-joined').textContent = joinDate.toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+            }
+
+            // Load demo symptom checks (none in demo mode)
+            document.getElementById('reports-count').textContent = '0 reports';
+            document.getElementById('reports-list').innerHTML = `
+                <div class="empty-reports">
+                    <div class="empty-reports-icon">📋</div>
+                    <h3>No Symptom Check Reports</h3>
+                    <p>Use the Symptom Checker to analyze your symptoms.</p>
+                </div>
+            `;
+
+            // Load demo disease reports from localStorage
+            const demoReports = JSON.parse(localStorage.getItem('healthscope_demo_reports') || '[]');
+            const userReports = demoReports.filter(r => r.user_id === user.id);
+
+            const diseaseReportsList = document.getElementById('disease-reports-list');
+            const diseaseReportsCount = document.getElementById('disease-reports-count');
+
+            if (userReports.length > 0) {
+                diseaseReportsCount.textContent = `${userReports.length} report${userReports.length > 1 ? 's' : ''}`;
+                diseaseReportsList.innerHTML = userReports.map(r => createDiseaseReportCard({
+                    disease_name: r.disease_name,
+                    severity: r.severity,
+                    location: `${r.location || ''}, ${r.district}, ${r.division}`,
+                    symptoms: r.symptoms,
+                    date: r.created_at
+                })).join('');
+            } else {
+                diseaseReportsCount.textContent = '0 reports';
+                diseaseReportsList.innerHTML = `
+                    <div class="empty-reports">
+                        <div class="empty-reports-icon">📝</div>
+                        <h3>No Disease Reports</h3>
+                        <p>Help your community by reporting disease cases.</p>
+                    </div>
+                `;
+            }
+
+            loadingState.style.display = 'none';
+            profileContent.style.display = 'block';
         }
 
         function createReportCard(report) {
@@ -495,6 +593,32 @@
 
         function formatSymptom(symptom) {
             return symptom.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        // Create disease report card HTML
+        function createDiseaseReportCard(report) {
+            const date = new Date(report.date);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            return `
+                <div class="report-card" style="border-left: 4px solid #f59e0b;">
+                    <div class="report-header">
+                        <div>
+                            <div class="report-disease">📋 ${report.disease_name || 'Disease Report'}</div>
+                            <div class="report-date">${formattedDate}</div>
+                        </div>
+                        <span class="report-severity severity-${report.severity || 'mild'}">${report.severity || 'mild'}</span>
+                    </div>
+                    ${report.location ? `<div style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">📍 ${report.location}</div>` : ''}
+                    ${report.symptoms ? `<div class="report-recommendations">${report.symptoms}</div>` : ''}
+                </div>
+            `;
         }
 
         async function handleLogout() {

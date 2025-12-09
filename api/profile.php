@@ -55,6 +55,7 @@ while ($row = $result->fetch_assoc()) {
 
     $reports[] = [
         'id' => $row['id'],
+        'type' => 'symptom_check',
         'symptoms' => $symptoms,
         'predicted_disease' => $row['predicted_disease'],
         'severity' => $row['severity'],
@@ -63,6 +64,34 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 $stmt->close();
+
+// Get disease reports for this user
+$diseaseReports = [];
+$stmt = $conn->prepare("
+    SELECT id, disease_name, symptoms, severity, location_name, created_at 
+    FROM disease_reports 
+    WHERE user_id = ? 
+    ORDER BY created_at DESC 
+    LIMIT 50
+");
+if ($stmt) {
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $diseaseReports[] = [
+            'id' => $row['id'],
+            'type' => 'disease_report',
+            'disease_name' => $row['disease_name'],
+            'symptoms' => $row['symptoms'],
+            'severity' => $row['severity'],
+            'location' => $row['location_name'],
+            'date' => $row['created_at']
+        ];
+    }
+    $stmt->close();
+}
 
 // Return profile data
 echo json_encode([
@@ -75,7 +104,9 @@ echo json_encode([
         'joined' => $user['created_at']
     ],
     'reports' => $reports,
-    'total_reports' => count($reports)
+    'disease_reports' => $diseaseReports,
+    'total_reports' => count($reports),
+    'total_disease_reports' => count($diseaseReports)
 ]);
 
 closeDBConnection($conn);

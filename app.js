@@ -977,20 +977,115 @@ function updateDistrictOptions(division) {
     });
 }
 
-function submitReport() {
+async function submitReport() {
     const diseaseType = document.getElementById('disease-type')?.value;
     const severity = document.querySelector('input[name="severity"]:checked')?.value;
     const division = document.getElementById('division')?.value;
     const district = document.getElementById('district')?.value;
+    const location = document.getElementById('location')?.value || '';
+    const symptoms = document.getElementById('symptoms')?.value || '';
+    const additionalInfo = document.getElementById('additional-info')?.value || '';
+    const submitBtn = document.querySelector('#report-form button[type="submit"]');
 
     if (!diseaseType || !severity || !division || !district) {
         showToast('❌ Please fill in all required fields', 'error');
         return;
     }
 
-    showToast('✓ Report submitted successfully! Thank you for contributing to community health.', 'success');
+    // Disable button
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Submitting...</span>';
+    }
+
+    const reportData = {
+        disease_type: diseaseType,
+        severity: severity,
+        division: division,
+        district: district,
+        location: location,
+        symptoms: symptoms,
+        additional_info: additionalInfo
+    };
+
+    try {
+        const response = await fetch('api/save-disease-report.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(reportData)
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            // Demo mode fallback
+            saveDemoReport(reportData, submitBtn);
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('✅ Report submitted successfully! Thank you for contributing.', 'success');
+            document.getElementById('report-form').reset();
+            // Update statistics (if on same page)
+            if (typeof loadStatistics === 'function') {
+                loadStatistics();
+            }
+        } else {
+            showToast(data.message || '❌ Failed to submit report', 'error');
+        }
+    } catch (error) {
+        console.error('Report submission error:', error);
+        // Demo mode fallback
+        saveDemoReport(reportData, submitBtn);
+    }
+
+    // Re-enable button
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Submit Report</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17 3L8 12M17 3L11 17L8 12M17 3L3 9L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+}
+
+// Demo mode: save disease report to localStorage
+function saveDemoReport(reportData, submitBtn) {
+    const diseaseNames = {
+        'flu': 'Seasonal Flu',
+        'dengue': 'Dengue Fever',
+        'covid': 'COVID-19',
+        'gastroenteritis': 'Gastroenteritis',
+        'typhoid': 'Typhoid',
+        'chickenpox': 'Chickenpox',
+        'other': 'Other'
+    };
+
+    const report = {
+        id: Date.now(),
+        user_id: authState.user?.id || null,
+        disease_name: diseaseNames[reportData.disease_type] || reportData.disease_type,
+        severity: reportData.severity,
+        division: reportData.division,
+        district: reportData.district,
+        location: reportData.location,
+        symptoms: reportData.symptoms,
+        additional_info: reportData.additional_info,
+        created_at: new Date().toISOString()
+    };
+
+    // Save to demo reports
+    const demoReports = JSON.parse(localStorage.getItem('healthscope_demo_reports') || '[]');
+    demoReports.push(report);
+    localStorage.setItem('healthscope_demo_reports', JSON.stringify(demoReports));
+
+    showToast('✅ Report submitted! (Demo Mode)', 'success');
     document.getElementById('report-form').reset();
-    setTimeout(() => document.getElementById('trends').scrollIntoView({ behavior: 'smooth' }), 1000);
+
+    // Re-enable button
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Submit Report</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17 3L8 12M17 3L11 17L8 12M17 3L3 9L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
 }
 
 // ===================
