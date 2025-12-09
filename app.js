@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeDiseaseMap();
     initializeReportForm();
     initializeHealthTips();
+    initializeAuthForms();
 });
 
 // ===================
@@ -116,10 +117,22 @@ function initializeSymptomChecker() {
     console.log('Found analyze button:', !!analyzeBtn);
     console.log('Found search input:', !!searchInput);
 
-    // Symptom selection
+    // Symptom selection - with debounce to prevent double-clicks
+    let isProcessingClick = false;
+
     symptomChips.forEach(chip => {
         console.log('Adding listener to chip:', chip.dataset.symptom);
-        chip.addEventListener('click', () => {
+        chip.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event bubbling from inner span
+
+            // Prevent double-processing
+            if (isProcessingClick) {
+                console.log('Click already being processed, ignoring');
+                return;
+            }
+
+            isProcessingClick = true;
+
             const symptom = chip.dataset.symptom;
             console.log('Chip clicked:', symptom);
 
@@ -136,6 +149,11 @@ function initializeSymptomChecker() {
             }
 
             updateAnalyzeButton();
+
+            // Reset flag after a short delay
+            setTimeout(() => {
+                isProcessingClick = false;
+            }, 100);
         });
     });
 
@@ -1061,13 +1079,3 @@ function initializeAuthForms() {
         });
     });
 }
-
-// Update initialization
-document.addEventListener('DOMContentLoaded', function () {
-    initializeNavigation();
-    initializeSymptomChecker();
-    initializeDiseaseMap();
-    initializeReportForm();
-    initializeHealthTips();
-    initializeAuthForms();  // Add this line
-});
