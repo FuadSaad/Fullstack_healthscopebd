@@ -25,11 +25,16 @@ $stats = [
     'affected_areas' => 0
 ];
 
-// Get total reports count
+// Base counts (initial values before any user reports)
+$BASE_REPORTS = 1247;
+$BASE_HOTSPOTS = 8;
+$BASE_AFFECTED_AREAS = 23;
+
+// Get total reports count from database and add base
 $result = $conn->query("SELECT COUNT(*) as total FROM disease_reports");
 if ($result) {
     $row = $result->fetch_assoc();
-    $stats['total_reports'] = intval($row['total']);
+    $stats['total_reports'] = $BASE_REPORTS + intval($row['total']); // 1247 + database count
 }
 
 // Get disease breakdown
@@ -58,18 +63,18 @@ if ($result) {
     }
 }
 
-// Count unique locations as affected areas
+// Count unique locations as affected areas (add base)
 $result = $conn->query("SELECT COUNT(DISTINCT location_name) as areas FROM disease_reports");
 if ($result) {
     $row = $result->fetch_assoc();
-    $stats['affected_areas'] = intval($row['areas']);
+    $stats['affected_areas'] = $BASE_AFFECTED_AREAS + intval($row['areas']); // 23 + new areas
 }
 
-// Count hotspots (locations with more than 3 reports)
+// Count hotspots (locations with more than 3 reports) add base
 $result = $conn->query("SELECT COUNT(*) as hotspots FROM (SELECT location_name FROM disease_reports GROUP BY location_name HAVING COUNT(*) >= 3) as h");
 if ($result) {
     $row = $result->fetch_assoc();
-    $stats['hotspots'] = intval($row['hotspots']);
+    $stats['hotspots'] = $BASE_HOTSPOTS + intval($row['hotspots']); // 8 + new hotspots
 }
 
 // Determine overall severity level

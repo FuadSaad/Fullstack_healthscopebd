@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeReportForm();
     initializeHealthTips();
     initializeAuthForms();
+    loadStatistics(); // Load real statistics from database
 });
 
 // ===================
@@ -1081,11 +1082,111 @@ function saveDemoReport(reportData, submitBtn) {
     showToast('✅ Report submitted! (Demo Mode)', 'success');
     document.getElementById('report-form').reset();
 
+    // Update statistics immediately
+    loadStatistics();
+
     // Re-enable button
     if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span>Submit Report</span><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17 3L8 12M17 3L11 17L8 12M17 3L3 9L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     }
+}
+
+// ===================
+// STATISTICS LOADING (Real-time updates)
+// ===================
+async function loadStatistics() {
+    const totalReportsEl = document.getElementById('total-reports');
+    const hotspotCountEl = document.getElementById('hotspot-count');
+    const affectedAreasEl = document.getElementById('affected-areas');
+    const severityLevelEl = document.getElementById('severity-level');
+
+    // Skip if elements don't exist (not on stats page)
+    if (!totalReportsEl) return;
+
+    try {
+        const response = await fetch('api/get-statistics.php');
+        const contentType = response.headers.get('content-type') || '';
+
+        if (!contentType.includes('application/json')) {
+            // Demo mode: use localStorage data
+            loadDemoStatistics();
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.stats) {
+            const stats = data.stats;
+            // Animate the number update
+            animateNumber(totalReportsEl, stats.total_reports);
+            animateNumber(hotspotCountEl, stats.hotspots);
+            animateNumber(affectedAreasEl, stats.affected_areas);
+            if (severityLevelEl) {
+                severityLevelEl.textContent = stats.severity_level || 'Low';
+            }
+        }
+    } catch (error) {
+        console.log('Statistics API not available, using demo mode');
+        loadDemoStatistics();
+    }
+}
+
+// Demo mode statistics (from localStorage)
+function loadDemoStatistics() {
+    const totalReportsEl = document.getElementById('total-reports');
+    const hotspotCountEl = document.getElementById('hotspot-count');
+    const affectedAreasEl = document.getElementById('affected-areas');
+
+    if (!totalReportsEl) return;
+
+    const demoReports = JSON.parse(localStorage.getItem('healthscope_demo_reports') || '[]');
+    const baseReports = 1247; // Base count to start with
+    const totalReports = baseReports + demoReports.length;
+
+    // Count unique locations as affected areas
+    const locations = new Set(demoReports.map(r => r.district));
+    const affectedAreas = 23 + locations.size; // Base + new
+
+    // Calculate hotspots (locations with 3+ reports)
+    const locationCounts = {};
+    demoReports.forEach(r => {
+        locationCounts[r.district] = (locationCounts[r.district] || 0) + 1;
+    });
+    const newHotspots = Object.values(locationCounts).filter(c => c >= 3).length;
+
+    animateNumber(totalReportsEl, totalReports);
+    animateNumber(hotspotCountEl, 8 + newHotspots);
+    animateNumber(affectedAreasEl, affectedAreas);
+}
+
+// Animate number counting effect
+function animateNumber(element, targetValue) {
+    if (!element) return;
+
+    const currentValue = parseInt(element.textContent.replace(/,/g, '')) || 0;
+    const diff = targetValue - currentValue;
+
+    if (diff === 0) {
+        element.textContent = targetValue.toLocaleString();
+        return;
+    }
+
+    const duration = 500; // ms
+    const steps = 20;
+    const stepValue = diff / steps;
+    let currentStep = 0;
+
+    const interval = setInterval(() => {
+        currentStep++;
+        const newValue = Math.round(currentValue + stepValue * currentStep);
+        element.textContent = newValue.toLocaleString();
+
+        if (currentStep >= steps) {
+            clearInterval(interval);
+            element.textContent = targetValue.toLocaleString();
+        }
+    }, duration / steps);
 }
 
 // ===================
